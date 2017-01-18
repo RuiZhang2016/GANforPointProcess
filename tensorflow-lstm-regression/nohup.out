@@ -1,0 +1,10 @@
+  File "Embedding_For_PointProcess.py", line 68
+    from __future__ import absolute_import
+SyntaxError: from __future__ imports must occur at the beginning of the file
+  File "Embedding_For_PointProcess.py", line 68
+    from __future__ import absolute_import
+SyntaxError: from __future__ imports must occur at the beginning of the file
+  File "Embedding_For_PointProcess.py", line 28
+SyntaxError: Non-ASCII character '\xef' in file Embedding_For_PointProcess.py on line 28, but no encoding declared; see http://python.org/dev/peps/pep-0263/ for details
+  File "Embedding_For_PointProcess.py", line 29
+SyntaxError: Non-ASCII character '\xef' in file Embedding_For_PointProcess.py on line 29, but no encoding declared; see http://python.org/dev/peps/pep-0263/ for details

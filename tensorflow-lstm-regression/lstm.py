@@ -21,40 +21,38 @@ def rnn_data(data, time_steps, labels=False):
         l = [1, 2, 3, 4, 5]
         time_steps = 2
         -> labels == False [[1, 2], [2, 3], [3, 4]]
-        -> labels == True [2, 3, 4, 5]
+        -> labels == True [3, 4, 5]
     """
     rnn_df = []
-    for i in range(len(data) - time_steps):
+    for i in xrange(0,len(data) - 2*time_steps,2):
         if labels:
             try:
-                rnn_df.append(data.iloc[i + time_steps].as_matrix())
+                rnn_df.append(data.iloc[i + 2*time_steps+1].as_matrix())
             except AttributeError:
-                rnn_df.append(data.iloc[i + time_steps])
+                rnn_df.append(data.iloc[i + 2*time_steps+1])
         else:
-            data_ = data.iloc[i: i + time_steps].as_matrix()
+            data_ = data.iloc[i: i +1+ 2*time_steps].as_matrix()
             rnn_df.append(data_ if len(data_.shape) > 1 else [[i] for i in data_])
 
     return np.array(rnn_df, dtype=np.float32)
 
 
-def split_data(data, val_size=0.1, test_size=0.1):
+def split_data(data,time_steps):
     """
     splits data to training, validation and testing parts
     """
-    ntest = int(round(len(data) * (1 - test_size)))
-    nval = int(round(len(data.iloc[:ntest]) * (1 - val_size)))
 
-    df_train, df_val, df_test = data.iloc[:nval], data.iloc[nval:ntest], data.iloc[ntest:]
+    df_train, df_val, df_test = data.iloc[:150], data.iloc[(150-2*time_steps):180], data.iloc[(180-2*time_steps):]
 
     return df_train, df_val, df_test
 
 
-def prepare_data(data, time_steps, labels=False, val_size=0.1, test_size=0.1):
+def prepare_data(data, time_steps, labels=False):
     """
     Given the number of `time_steps` and some data,
     prepares training, validation and test data for an lstm cell.
     """
-    df_train, df_val, df_test = split_data(data, val_size, test_size)
+    df_train, df_val, df_test = split_data(data, time_steps)
     return (rnn_data(df_train, time_steps, labels=labels),
             rnn_data(df_val, time_steps, labels=labels),
             rnn_data(df_test, time_steps, labels=labels))
@@ -116,7 +114,7 @@ def lstm_model(num_units, rnn_layers, dense_layers=None, learning_rate=0.1, opti
 
     def _lstm_model(X, y):
         stacked_lstm = tf.nn.rnn_cell.MultiRNNCell(lstm_cells(rnn_layers), state_is_tuple=True)
-        x_ = tf.unpack(X, axis=1, num=num_units)
+        x_ = tf.unpack(X, axis=1, num = 2*num_units+1)
         output, layers = tf.nn.rnn(stacked_lstm, x_, dtype=dtypes.float32)
         output = dnn_layers(output[-1], dense_layers)
         prediction, loss = tflearn.models.linear_regression(output, y)
